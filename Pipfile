@@ -11,6 +11,7 @@ flask-restful = "*"
 pipenv-to-requirements = "*"
 flask-sqlalchemy = "*"
 psycopg2-binary = "*"
+flask-testing = "*"
 
 [requires]
 python_version = "3.7"
