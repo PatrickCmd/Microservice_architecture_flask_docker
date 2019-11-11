@@ -9,6 +9,8 @@ verify_ssl = true
 flask = "*"
 flask-restful = "*"
 pipenv-to-requirements = "*"
+flask-sqlalchemy = "*"
+psycopg2-binary = "*"
 
 [requires]
 python_version = "3.7"
