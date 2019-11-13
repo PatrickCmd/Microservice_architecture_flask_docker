@@ -22,8 +22,8 @@ docker-machine ip microservice-architecture-flask
 docker-compose -f docker-compose-prod.yml up -d --build nginx
 
 ## Point docker-machine to active remote hoste
-docker-machine env testdriven-prod
-eval $(docker-machine env testdriven-prod)
+docker-machine env microservice-architecture-flask
+eval $(docker-machine env microservice-architecture-flask)
 
 ## Point docker-machine back to localhost
 eval $(docker-machine env -u)
