@@ -12,6 +12,7 @@ pipenv-to-requirements = "*"
 flask-sqlalchemy = "*"
 psycopg2-binary = "*"
 flask-testing = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
