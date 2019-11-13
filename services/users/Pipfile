@@ -16,6 +16,7 @@ gunicorn = "*"
 coverage = "*"
 flake8 = "*"
 black = "===19.10b0"
+flask-debugtoolbar = "*"
 
 [requires]
 python_version = "3.7"
