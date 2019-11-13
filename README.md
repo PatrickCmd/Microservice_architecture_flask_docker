@@ -26,6 +26,15 @@ Run the tests:
 ```
 $ docker-compose exec users python manage.py test
 ```
+Run the tests with coverage
+```
+$ docker-compose exec users python manage.py cov
+```
+Code quality and linting
+```
+$ docker-compose exec users flake8 project
+$ docker-compose exec users black project
+```
 
 ## Other commands
 To stop the containers:
