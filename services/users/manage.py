@@ -51,7 +51,7 @@ def test():
     sys.exit(result)
 
 @cli.command()
-def cov():
+def test_cov():
     """Runs the unit tests with coverage."""
     tests = unittest.TestLoader().discover('project/tests')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
