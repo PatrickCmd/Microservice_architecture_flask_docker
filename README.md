@@ -1,5 +1,7 @@
 # Microservice_architecture_flask_docker
 
+[![Build Status](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker.svg?token=5DLmUBR4W3LuNvxXHAap&branch=devel)](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker)
+
 
 ## Common Commands
 Build the images:
@@ -28,7 +30,7 @@ $ docker-compose exec users python manage.py test
 ```
 Run the tests with coverage
 ```
-$ docker-compose exec users python manage.py cov
+$ docker-compose exec users python manage.py test-cov
 ```
 Code quality and linting
 ```
