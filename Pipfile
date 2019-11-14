@@ -17,6 +17,7 @@ coverage = "*"
 flake8 = "*"
 black = "===19.10b0"
 flask-debugtoolbar = "*"
+flask-cors = "*"
 
 [requires]
 python_version = "3.7"
