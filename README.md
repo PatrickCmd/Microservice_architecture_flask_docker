@@ -16,7 +16,21 @@ Build images and run the containers with Nginx
 ```
 docker-compose up -d --build nginx
 ```
-Create the database:
+Initialize database and run migrations
+```
+$ docker-compose exec users python manage.py db init
+
+$ docker-compose exec users python manage.py db migrate
+
+$ docker-compose exec users python manage.py db upgrade
+```
+Update database tables and upgrade
+```
+$ docker-compose exec users python manage.py db migrate
+
+$ docker-compose exec users python manage.py db upgrade
+```
+Re-create the database:
 ```
 $ docker-compose exec users python manage.py recreate_db
 ```
@@ -34,7 +48,7 @@ $ docker-compose exec users python manage.py test-cov
 ```
 Code quality and linting
 ```
-$ docker-compose exec users flake8 project
+$ docker-compose exec users flake8 --max-line-length=100 project
 $ docker-compose exec users black project
 ```
 
