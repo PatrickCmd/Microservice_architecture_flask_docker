@@ -4,6 +4,7 @@
 import os
 
 from flask import Flask
+from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_migrate import Migrate
@@ -11,6 +12,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 
 # instantiate the extensions
+bcrypt = Bcrypt()
 cors = CORS()
 db = SQLAlchemy()
 migrate = Migrate()
@@ -26,6 +28,7 @@ def create_app(script_info=None):
     app.config.from_object(app_settings)
 
     # set up extensions
+    bcrypt.init_app(app)
     cors.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
