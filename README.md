@@ -124,3 +124,8 @@ docker-machine ip microservice-architecture-flask
 ```
 eval $(docker-machine env -u)
 ```
+
+## Authentication and Authorization
+- [JWT TOKENS](https://jwt.io/introduction/)
+- [Cookie vs Token-Base Authentication](https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide)
+- [CSRF Attacks Demystified](https://www.gnucitizen.org/blog/csrf-demystified/)
