@@ -18,7 +18,8 @@ def index():
     if request.method == "POST":
         username = request.form["username"]
         email = request.form["email"]
-        user = User(username=username, email=email)
+        password = request.form["password"]
+        user = User(username=username, email=email, password=password)
         db.session.add(user)
         db.session.commit()
     users = User.query.all()
@@ -38,11 +39,12 @@ class UsersList(Resource):
             return response_object, 400
         username = post_data.get("username")
         email = post_data.get("email")
+        password = post_data.get("password")
 
         try:
             user = User.query.filter_by(email=email).first()
             if not user:
-                user = User(username=username, email=email)
+                user = User(username=username, email=email, password=password)
                 db.session.add(user)
                 db.session.commit()
                 response_object = {
@@ -53,7 +55,7 @@ class UsersList(Resource):
             else:
                 response_object["message"] = "Sorry. That email already exists."
                 return response_object, 400
-        except exc.IntegrityError:
+        except (exc.IntegrityError, ValueError):
             db.session.rollback()
             return response_object, 400
 

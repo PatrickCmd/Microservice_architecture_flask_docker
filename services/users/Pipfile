@@ -19,6 +19,7 @@ black = "===19.10b0"
 flask-debugtoolbar = "*"
 flask-cors = "*"
 flask-migrate = "*"
+flask-bcrypt = "*"
 
 [requires]
 python_version = "3.7"
