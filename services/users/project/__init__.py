@@ -6,12 +6,14 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_debugtoolbar import DebugToolbarExtension
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 
 # instantiate the extensions
 cors = CORS()
 db = SQLAlchemy()
+migrate = Migrate()
 toolbar = DebugToolbarExtension()
 
 
@@ -26,6 +28,7 @@ def create_app(script_info=None):
     # set up extensions
     cors.init_app(app)
     db.init_app(app)
+    migrate.init_app(app, db)
     toolbar.init_app(app)
 
     # register blueprints
