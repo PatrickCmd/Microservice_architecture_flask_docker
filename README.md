@@ -1,4 +1,4 @@
-# Microservice_architecture_flask_react_docker
+# Microservice Architecture Flask, React, and Docker
 
 [![Build Status](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker.svg?token=5DLmUBR4W3LuNvxXHAap&branch=devel)](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker)
 
@@ -129,3 +129,4 @@ eval $(docker-machine env -u)
 - [JWT TOKENS](https://jwt.io/introduction/)
 - [Cookie vs Token-Base Authentication](https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide)
 - [CSRF Attacks Demystified](https://www.gnucitizen.org/blog/csrf-demystified/)
+- [SWT vs JWT](https://www.networknt.com/architecture/swt-vs-jwt/)
