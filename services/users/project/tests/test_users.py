@@ -23,7 +23,7 @@ class TestUserService(BaseTestCase):
         """Ensure a new user can be added to the database."""
         with self.client:
             response = self.client.post(
-                "users",
+                "/users",
                 data=json.dumps(
                     {
                         "username": "patocmd",
@@ -42,7 +42,7 @@ class TestUserService(BaseTestCase):
         """Ensure error is thrown if the JSON object is empty."""
         with self.client:
             response = self.client.post(
-                "users", data=json.dumps({}), content_type="application/json",
+                "/users", data=json.dumps({}), content_type="application/json",
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -53,7 +53,7 @@ class TestUserService(BaseTestCase):
         """Ensure error is thrown if the JSON object doesn't have a username key."""
         with self.client:
             response = self.client.post(
-                "users",
+                "/users",
                 data=json.dumps(
                     {"email": "patocmd@mail.com", "password": "testpassword"}
                 ),
@@ -68,7 +68,7 @@ class TestUserService(BaseTestCase):
         """Ensure error is thrown if the email already exists."""
         with self.client:
             self.client.post(
-                "users",
+                "/users",
                 data=json.dumps(
                     {
                         "username": "patocmd",
@@ -79,7 +79,7 @@ class TestUserService(BaseTestCase):
                 content_type="application/json",
             )
             response = self.client.post(
-                "users",
+                "/users",
                 data=json.dumps(
                     {
                         "username": "patocmd",
