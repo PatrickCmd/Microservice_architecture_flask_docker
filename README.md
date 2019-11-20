@@ -53,6 +53,10 @@ $ docker-compose exec users black project
 ```
 Run the client react tests
 ```
+$ docker-compose exec client npm test
+```
+Run the client react tests with coverage
+```
 $ docker-compose exec client react-scripts test --coverage --watchAll=false
 ```
 
@@ -129,6 +133,17 @@ docker-machine ip microservice-architecture-flask
 eval $(docker-machine env -u)
 ```
 
+## Flask and Extensions
+- [Flask]()
+- [API](https://flask.palletsprojects.com/en/1.1.x/api/)
+- [Flask Blueprints](https://flask.palletsprojects.com/en/1.1.x/blueprints/)
+- [Flask Restful](https://flask-restful.readthedocs.io/en/latest/index.html)
+- [Flask-Bcrypt](https://flask-bcrypt.readthedocs.io/en/latest/)
+- [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/2.x/)
+- [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/)
+- [SQLAlchemy](https://docs.sqlalchemy.org/en/13/index.html)
+
+
 ## Authentication and Authorization
 - [JWT TOKENS](https://jwt.io/introduction/)
 - [Cookie vs Token-Base Authentication](https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide)
@@ -139,9 +154,16 @@ eval $(docker-machine env -u)
 - [Docker](https://docs.docker.com/get-started/)
 - [Docker Machine](https://docs.docker.com/machine/)
 
+## React App
+- [Create React App](https://create-react-app.dev/)
+
+## Bulma Css
+- [Bulma.io](https://bulma.io/)
+
 ## React Router
 - [React-Router](https://reacttraining.com/react-router/web/guides/quick-start)
 
 ## React Testing
 - [Jest](https://jestjs.io/docs/en/getting-started)
 - [Enzyme](https://airbnb.io/enzyme/https://airbnb.io/enzyme/https://airbnb.io/enzyme/)
+- [Router Testing Guide](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/guides/testing.md)
