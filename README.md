@@ -1,4 +1,4 @@
-# Microservice Architecture Flask, React, and Docker
+# Microservice Architecture Flask React and Docker
 
 [![Build Status](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker.svg?token=5DLmUBR4W3LuNvxXHAap&branch=devel)](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker)
 
@@ -50,6 +50,10 @@ Code quality and linting
 ```
 $ docker-compose exec users flake8 --max-line-length=100 project
 $ docker-compose exec users black project
+```
+Run the client react tests
+```
+$ docker-compose exec client react-scripts test --coverage --watchAll=false
 ```
 
 ## Other commands
@@ -130,3 +134,14 @@ eval $(docker-machine env -u)
 - [Cookie vs Token-Base Authentication](https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide)
 - [CSRF Attacks Demystified](https://www.gnucitizen.org/blog/csrf-demystified/)
 - [SWT vs JWT](https://www.networknt.com/architecture/swt-vs-jwt/)
+
+## Docker Docs
+- [Docker](https://docs.docker.com/get-started/)
+- [Docker Machine](https://docs.docker.com/machine/)
+
+## React Router
+- [React-Router](https://reacttraining.com/react-router/web/guides/quick-start)
+
+## React Testing
+- [Jest](https://jestjs.io/docs/en/getting-started)
+- [Enzyme](https://airbnb.io/enzyme/https://airbnb.io/enzyme/https://airbnb.io/enzyme/)
