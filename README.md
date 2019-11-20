@@ -55,9 +55,13 @@ Run the client react tests
 ```
 $ docker-compose exec client npm test
 ```
+Run the client react tests with verbosity
+```
+$ docker-compose exec client npm test -- --verbose
+```
 Run the client react tests with coverage
 ```
-$ docker-compose exec client react-scripts test --coverage --watchAll=false
+$ docker-compose exec client react-scripts test --coverage --watchAll=false --verbose
 ```
 
 ## Other commands
