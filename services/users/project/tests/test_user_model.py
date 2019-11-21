@@ -7,7 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from project import db
 from project.api.models import User
 from project.tests.base import BaseTestCase
-from project.tests.utils import add_user
+from project.tests.utils import add_user, add_admin
 
 
 class TestUserModel(BaseTestCase):
@@ -17,12 +17,13 @@ class TestUserModel(BaseTestCase):
         self.assertNotEqual(user_one.password, user_two.password)
 
     def test_add_user(self):
-        user = add_user("testuser", "test@test.com", "testpassword")
+        user = add_admin("testuser", "test@test.com", "testpassword")
         self.assertTrue(user.id)
         self.assertEqual(user.username, "testuser")
         self.assertEqual(user.email, "test@test.com")
         self.assertTrue(user.active)
         self.assertTrue(user.password)
+        self.assertTrue(user.admin)
 
     def test_add_user_duplicate_username(self):
         add_user("testuser", "test@test.com", "testpassword")

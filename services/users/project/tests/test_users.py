@@ -4,8 +4,10 @@
 import json
 import unittest
 
+from project import db
+from project.api.models import User
 from project.tests.base import BaseTestCase
-from project.tests.utils import add_user
+from project.tests.utils import add_user, add_admin
 
 
 class TestUserService(BaseTestCase):
@@ -21,7 +23,16 @@ class TestUserService(BaseTestCase):
 
     def test_add_user(self):
         """Ensure a new user can be added to the database."""
+        add_admin("testuser", "test@test.com", "test1234")
         with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
             response = self.client.post(
                 "/users",
                 data=json.dumps(
@@ -32,6 +43,7 @@ class TestUserService(BaseTestCase):
                     }
                 ),
                 content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 201)
@@ -40,9 +52,21 @@ class TestUserService(BaseTestCase):
 
     def test_add_user_invalid_json(self):
         """Ensure error is thrown if the JSON object is empty."""
+        add_admin("testuser", "test@test.com", "test1234")
         with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
             response = self.client.post(
-                "/users", data=json.dumps({}), content_type="application/json",
+                "/users",
+                data=json.dumps({}),
+                content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -51,13 +75,23 @@ class TestUserService(BaseTestCase):
 
     def test_add_user_invalid_json_keys(self):
         """Ensure error is thrown if the JSON object doesn't have a username key."""
+        add_admin("testuser", "test@test.com", "test1234")
         with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
             response = self.client.post(
                 "/users",
                 data=json.dumps(
                     {"email": "patocmd@mail.com", "password": "testpassword"}
                 ),
                 content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -66,7 +100,16 @@ class TestUserService(BaseTestCase):
 
     def test_add_user_duplicate_email(self):
         """Ensure error is thrown if the email already exists."""
+        add_admin("testuser", "test@test.com", "test1234")
         with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
             self.client.post(
                 "/users",
                 data=json.dumps(
@@ -77,6 +120,7 @@ class TestUserService(BaseTestCase):
                     }
                 ),
                 content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             response = self.client.post(
                 "/users",
@@ -88,6 +132,7 @@ class TestUserService(BaseTestCase):
                     }
                 ),
                 content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
@@ -133,6 +178,10 @@ class TestUserService(BaseTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertEqual(len(data["data"]["users"]), 2)
             self.assertIn("success", data["status"])
+            self.assertTrue(data["data"]["users"][0]["active"])
+            self.assertFalse(data["data"]["users"][0]["admin"])
+            self.assertTrue(data["data"]["users"][1]["active"])
+            self.assertFalse(data["data"]["users"][1]["admin"])
 
     def test_index_no_users(self):
         """Ensure the index route behaves correctly when no users have been
@@ -179,16 +228,86 @@ class TestUserService(BaseTestCase):
         Ensure error is thrown if the JSON object
         does not have a password keygraphene.
         """
+        add_admin("testuser", "test@test.com", "test1234")
         with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
             response = self.client.post(
                 "/users",
                 data=json.dumps(dict(username="patocmd", email="patocmd@mail.com")),
                 content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
             )
             data = json.loads(response.data.decode())
             self.assertEqual(response.status_code, 400)
             self.assertIn("Invalid payload", data["message"])
             self.assertIn("fail", data["status"])
+
+    def test_add_user_inactive(self):
+        add_user("testuser", "test@test.com", "test1234")
+        # update user
+        user = User.query.filter_by(email="test@test.com").first()
+        user.active = False
+        db.session.commit()
+        with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
+            response = self.client.post(
+                "/users",
+                data=json.dumps(
+                    {
+                        "username": "patocmd",
+                        "email": "patocmd@mail.com",
+                        "password": "testpassword",
+                    }
+                ),
+                content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 401)
+            self.assertEqual(data["status"], "fail")
+            self.assertEqual(data["message"], "Provide a valid auth token.")
+
+    def test_add_user_not_admin(self):
+        add_user("testuser", "test@test.com", "test1234")
+        with self.client:
+            # user login
+            resp_login = self.client.post(
+                "/auth/login",
+                data=json.dumps({"email": "test@test.com", "password": "test1234"}),
+                content_type="application/json",
+            )
+            # valid token logout
+            token = json.loads(resp_login.data.decode())["auth_token"]
+            response = self.client.post(
+                "/users",
+                data=json.dumps(
+                    {
+                        "username": "patocmd",
+                        "email": "patocmd@mail.com",
+                        "password": "testpassword",
+                    }
+                ),
+                content_type="application/json",
+                headers={"Authorization": f"Bearer {token}"},
+            )
+            data = json.loads(response.data.decode())
+            self.assertEqual(response.status_code, 401)
+            self.assertEqual(data["status"], "fail")
+            self.assertEqual(data["message"], "You do not have permission to do that.")
 
 
 if __name__ == "__main__":
