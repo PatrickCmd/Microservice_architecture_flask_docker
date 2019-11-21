@@ -30,6 +30,12 @@ $ docker-compose exec users python manage.py db migrate
 
 $ docker-compose exec users python manage.py db upgrade
 ```
+When you get the error Target database is not up to date, try:
+```
+$ docker-compose exec users python manage.py db stamp heads
+$ docker-compose exec users python manage.py db current
+$ docker-compose exec users python manage.py db migrate
+```
 Re-create the database:
 ```
 $ docker-compose exec users python manage.py recreate_db
@@ -149,6 +155,8 @@ eval $(docker-machine env -u)
 
 
 ## Authentication and Authorization
+- [Wiki](https://en.wikipedia.org/wiki/Authentication#Authorization)
+- [Geeks](https://www.geeksforgeeks.org/difference-between-authentication-and-authorization/)
 - [JWT TOKENS](https://jwt.io/introduction/)
 - [Cookie vs Token-Base Authentication](https://dzone.com/articles/cookies-vs-tokens-the-definitive-guide)
 - [CSRF Attacks Demystified](https://www.gnucitizen.org/blog/csrf-demystified/)
@@ -160,6 +168,12 @@ eval $(docker-machine env -u)
 
 ## React App
 - [Create React App](https://create-react-app.dev/)
+
+## Axios
+- [Axios Blog](https://blog.logrocket.com/how-to-make-http-requests-like-a-pro-with-axios/)
+- [Flaviocopes](https://flaviocopes.com/axios/)
+- [alligator.io](https://alligator.io/react/axios-react/)
+- [Github](https://github.com/axios/axios)
 
 ## Bulma Css
 - [Bulma.io](https://bulma.io/)
