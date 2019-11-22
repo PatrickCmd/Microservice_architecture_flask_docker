@@ -1,11 +1,11 @@
-# base image
-FROM python:3.7.2-alpine
+# base image  # Since Flask-Bcrypt depends on some libraries that need to be compiled,
+              # we'll use a different starter image in the Dockerfile.
+FROM python:3.7.2-slim
 
-# install dependencie
-RUN apk update && \
-    apk add --virtual build-deps gcc python-dev musl-dev && \
-    apk add postgresql-dev && \
-    apk add netcat-openbsd
+# install netcat
+RUN apt-get update && \
+    apt-get -y install netcat gcc && \
+    apt-get clean
 
 # set working directory
 RUN mkdir -p /usr/src/app

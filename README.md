@@ -137,6 +137,10 @@ Get remote host IP
 ```
 docker-machine ip microservice-architecture-flask
 ```
+Export REACT APP URL
+```
+export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_IP
+```
 
 ## Point docker-machine back to localhost
 ```
