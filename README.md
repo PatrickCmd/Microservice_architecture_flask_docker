@@ -70,6 +70,12 @@ Run the client react tests with coverage
 $ docker-compose exec client react-scripts test --coverage --watchAll=false --verbose
 ```
 
+## Automated testing
+Run the bash script to run all tests.
+```
+$ sh test.sh
+```
+
 ## Other commands
 To stop the containers:
 ```
@@ -157,6 +163,10 @@ eval $(docker-machine env -u)
 - [Flask-Migrate](https://flask-migrate.readthedocs.io/en/latest/)
 - [SQLAlchemy](https://docs.sqlalchemy.org/en/13/index.html)
 
+## Nginx
+- [Nginx Reverse Proxy](https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/)
+- [Proxying WebSockets with Nginx](https://chrislea.com/2013/02/23/proxying-websockets-with-nginx/)
+
 
 ## Authentication and Authorization
 - [Wiki](https://en.wikipedia.org/wiki/Authentication#Authorization)
@@ -190,3 +200,7 @@ eval $(docker-machine env -u)
 - [Enzyme](https://airbnb.io/enzyme/https://airbnb.io/enzyme/https://airbnb.io/enzyme/)
 - [Router Testing Guide](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/guides/testing.md)
 - [React Testing Library - Works best with hooks](https://github.com/testing-library/react-testing-library)
+
+## End to End Testing
+- [Cypress](https://www.cypress.io/)
+- [Cypress API](https://docs.cypress.io/api/api/table-of-contents.html)

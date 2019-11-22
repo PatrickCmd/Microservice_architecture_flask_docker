@@ -1,0 +1,6 @@
+{
+    "name": "patrickcmd-io",
+    "devDependencies": {
+        "cypress": "^3.6.1"
+    }
+}
