@@ -35,6 +35,17 @@ class App extends Component {
         this.getUsers();
     };
 
+    /*** 
+     * This Lifecycle Method is deprecated. Instead of componentWillMount, use the constructor for 
+     * things that do NOT produce side-effects and use componentDidMount for the things that do 
+     * produce side-effects. 
+    ***/
+    UNSAFE_componentWillMount() {
+        if (window.localStorage.getItem('authToken')) {
+          this.setState({ isAuthenticated: true });
+        };
+    };
+
     addUser(event) {
         event.preventDefault();
         const data = {

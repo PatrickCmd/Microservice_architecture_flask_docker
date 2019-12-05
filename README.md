@@ -69,6 +69,19 @@ Run the client react tests with coverage
 ```
 $ docker-compose exec client react-scripts test --coverage --watchAll=false --verbose
 ```
+Run End to end tests
+```
+$ ./node_modules/.bin/cypress open
+```
+Run End to end tests on production build
+```
+$ docker-compose -f docker-compose-prod.yml up -d --build
+
+$ docker-compose -f docker-compose-prod.yml exec users python manage.py recreate_db
+
+$ docker-compose -f docker-compose-prod.yml exec users python manage.py seed_db
+$ ./node_modules/.bin/cypress open --config baseUrl=http://localhost
+```
 
 ## Automated testing
 Run the bash script to run all tests.
@@ -101,8 +114,8 @@ $ docker-compose exec users-db psql -U postgres
 ```
 Then, you can connect to the database and run SQL queries. For example:
 ```
-# \c users_dev
-# select * from users;
+$ \c users_dev
+$ select * from users
 ```
 Access application interactive shell
 ```
@@ -176,8 +189,19 @@ eval $(docker-machine env -u)
 - [CSRF Attacks Demystified](https://www.gnucitizen.org/blog/csrf-demystified/)
 - [SWT vs JWT](https://www.networknt.com/architecture/swt-vs-jwt/)
 
+## Docker for Desktop
+- Docker
+- Docker Machine
+- Docker-Compose
+- Docker Daemon
+- Kubernetes
+
+## Registries
+- GCR, Docker Hub, ECR, ACR
+
 ## Docker Docs
 - [Docker](https://docs.docker.com/get-started/)
+- [Docker Compose](https://docs.docker.com/compose/)
 - [Docker Machine](https://docs.docker.com/machine/)
 
 ## React App
