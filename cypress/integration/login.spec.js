@@ -43,6 +43,7 @@ describe("Login and Logout", () => {
             .get("table")
             .find("tbody > tr").last()
             .find("td").contains(username);
+        cy.get(".notification.is-success").contains("Welcome!")
         cy.get(".navbar-burger").click();
         cy.get(".navbar-menu").within(() => {
             cy
@@ -66,5 +67,51 @@ describe("Login and Logout", () => {
                 .get(".navbar-item").contains("Register");
         });
 
+    });
+
+    it("should throw an error if the credentilals are incorrect", () => {
+        // attempt to login with wrong email
+        cy
+            .visit("/login")
+            .get("input[name='email']").type("incorrect@email.com")
+            .get("input[name='password']").type(password)
+            .get("input[type='submit']").click()
+        //assert user login failed
+        cy.contains("All Users").should("not.be.visible");
+        cy.contains("Register");
+        cy.get(".navbar-burger").click();
+        cy.get(".navbar-menu").within(() => {
+            cy
+                .get(".navbar-item").contains("User Status").should("not.be.visible")
+                .get(".navbar-item").contains("Log Out").should("not.be.visible")
+                .get(".navbar-item").contains("Log In")
+                .get(".navbar-item").contains("Register");
+        });
+        cy
+            .get(".notification.is-success").should("not.be.visible")
+            .get(".notification.is-danger").contains("User does not exist.");
+        
+        // attempt to login with incorrect password
+        cy
+            .visit("/login")
+            .get("input[name='email']").type(email)
+            .get("input[name='password']").type('incorectpassword')
+            .get("input[type='submit']").click()
+            .wait(100);
+
+        //assert user login failed
+        cy.contains("All Users").should("not.be.visible");
+        cy.contains("Register");
+        cy.get(".navbar-burger").click();
+        cy.get(".navbar-menu").within(() => {
+            cy
+                .get(".navbar-item").contains("User Status").should("not.be.visible")
+                .get(".navbar-item").contains("Log Out").should("not.be.visible")
+                .get(".navbar-item").contains("Log In")
+                .get(".navbar-item").contains("Register");
+        });
+        cy
+            .get(".notification.is-success").should("not.be.visible")
+            .get(".notification.is-danger").contains("Login failed.");
     });
 });

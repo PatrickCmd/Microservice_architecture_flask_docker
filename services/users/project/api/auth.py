@@ -66,6 +66,9 @@ def login_user():
                 response_object["message"] = "Successfully logged in."
                 response_object["auth_token"] = auth_token.decode()
                 return jsonify(response_object), 200
+        elif user and not bcrypt.check_password_hash(user.password, password):
+            response_object["message"] = "Login failed."
+            return jsonify(response_object), 404
         else:
             response_object["message"] = "User does not exist."
             return jsonify(response_object), 404
