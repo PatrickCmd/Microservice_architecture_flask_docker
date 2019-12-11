@@ -2,13 +2,17 @@ const randomstring = require("randomstring");
 
 const username = randomstring.generate();
 const email = `${username}@test.com`;
+const password = "greaterthanten";
 
 describe("Login and Logout", () => {
     it("should display the sign in form", () => {
         cy
             .visit("/login")
             .get("h1").contains("Log In")
-            .get("form");
+            .get("form")
+            .get("input[disabled]")
+            .get(".validation-list")
+            .get(".validation-list > .error").first().contains("Email is required.");
     });
 
     it("should allow a user to sign in", () => {
@@ -17,7 +21,7 @@ describe("Login and Logout", () => {
             .visit("/register")
             .get("input[name='username']").type(username)
             .get("input[name='email']").type(email)
-            .get("input[name='password']").type("test")
+            .get("input[name='password']").type(password)
             .get("input[type='submit']").click()
         
         // log a user out
@@ -28,7 +32,7 @@ describe("Login and Logout", () => {
         cy
             .get("a").contains("Log In").click()
             .get("input[name='email']").type(email)
-            .get("input[name='password']").type("test")
+            .get("input[name='password']").type(password)
             .get("input[type='submit']").click()
             .wait(100);
         
