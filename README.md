@@ -84,9 +84,22 @@ $ ./node_modules/.bin/cypress open --config baseUrl=http://localhost
 ```
 
 ## Automated testing
+#### Run server-side tests
+```
+$ sh test.sh server
+```
+#### Run client-side tests
+```
+$ sh test.sh client
+```
+#### Run e2e tests
+```
+$ sh test e2e
+```
+#### Run all tests
 Run the bash script to run all tests.
 ```
-$ sh test.sh
+$ sh test.sh all
 ```
 
 ## Other commands
