@@ -122,7 +122,17 @@ class Form extends Component {
             this.clearForm();
             this.props.loginUser(res.data.auth_token);
         })
-        .catch((err) => { console.log(err); });
+        .catch((err) => {
+            if (formType === "Login") {
+                const { message } = err.response.data;
+                this.props.createMessage(message, "danger");
+            };
+
+            if (formType === "Register") {
+                const { message } = err.response.data;
+                this.props.createMessage(message, "danger");
+            };
+        });
     };
 
     render () {
