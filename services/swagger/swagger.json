@@ -12,8 +12,8 @@
     ],
     "tags": [
         {
-          "name": "user",
-          "description": "Operations about user"
+            "name": "user",
+            "description": "Operations about user"
         }
     ],
     "paths": {
@@ -121,6 +121,10 @@
                 "responses": {
                     "201": {
                         "description": "user object"
+                    },
+                    "400": {
+                        "description": "That user already exists / Invalid payload",
+                        "content": {}
                     }
                 }
             }
@@ -145,6 +149,18 @@
                 "responses": {
                     "200": {
                         "description": "Successfully logged in"
+                    },
+                    "400": {
+                        "description": "Invalid payload.",
+                        "content": {}
+                    },
+                    "404": {
+                        "description": "User does not exist.",
+                        "content": {}
+                    },
+                    "500": {
+                        "description": "Invalid payload.",
+                        "content": {}
                     }
                 }
             }

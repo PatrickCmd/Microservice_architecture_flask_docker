@@ -139,6 +139,41 @@ Show application URL routes
 docker-compose exec users python manage.py routes
 ```
 
+## Staging setup with Docker machine (AWS)
+Create remote host with docker machine
+```
+$ docker-machine create --driver amazonec2 --amazonec2-open-port 8000 --amazonec2-region us-east-2 microservice-architecture-flask-staging
+```
+Build remote host image
+```
+$ docker-compose -f docker-compose-stage.yml up -d --build
+```
+Create database tables
+```
+$ docker-compose -f docker-compose-stage.yml exec users python manage.py recreate_db
+```
+Seed the database
+```
+$ docker-compose -f docker-compose-stage.yml exec users python manage.py seed_db
+```
+Point docker-machine to active remote hoste
+```
+$ docker-machine env microservice-architecture-flask-staging
+$ eval $(docker-machine env microservice-architecture-flask-staging)
+```
+Run tests
+```
+docker-compose -f docker-compose-stage.yml exec users python manage.py test
+```
+Get remote host IP
+```
+docker-machine ip microservice-architecture-flask-staging
+```
+Export REACT APP URL
+```
+export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_STAGING_IP
+```
+
 ## Production setup with Docker machine (AWS)
 Create remote host with docker machine
 ```
@@ -163,7 +198,7 @@ $ eval $(docker-machine env microservice-architecture-flask)
 ```
 Run tests
 ```
-docker-compose exec users python manage.py test
+docker-compose -f docker-compose-prod.yml exec users python manage.py test
 ```
 Get remote host IP
 ```
