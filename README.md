@@ -241,3 +241,9 @@ eval $(docker-machine env -u)
 ## End to End Testing
 - [Cypress](https://www.cypress.io/)
 - [Cypress API](https://docs.cypress.io/api/api/table-of-contents.html)
+
+## Swagger
+- [OPENAPI(OAI)](https://www.openapis.org/)
+- [SWagger](https://swagger.io/docs/specification/about/)
+- [Swagger Specification](https://swagger.io/specification/)
+- [JSON to YAML / YAML to JSON](https://www.json2yaml.com/)
