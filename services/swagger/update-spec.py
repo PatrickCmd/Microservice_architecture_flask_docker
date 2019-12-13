@@ -9,7 +9,7 @@ def update_json_file(url):
         data = json.load(file)
     data["servers"][0]["url"] = url
     with open(full_path, "w") as file:
-        json.dump(data, file)
+        json.dump(data, file, indent=4)
     return True
 
 

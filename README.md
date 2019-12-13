@@ -450,3 +450,178 @@ docker-compose exec users python manage.py routes
 - [SWagger](https://swagger.io/docs/specification/about/)
 - [Swagger Specification](https://swagger.io/specification/)
 - [JSON to YAML / YAML to JSON](https://www.json2yaml.com/)
+
+# AWS(ECS)
+## What is Container Orchestration?
+As you move from deploying containers on a single machine to deploying them across a number of machines, you will need an orchestration tool to manage the arrangement and coordination of the containers across the entire system. This is where ECS fits in along with a number of other orchestration tools, like [Kubernetes](https://kubernetes.io/), [Mesos](https://mesos.apache.org/), and [Docker Swarm](https://docs.docker.com/engine/swarm/).
+
+![kubernetes vs docker swarm vs mesos](https://testdriven.io/static/images/courses/microservices/05_kubernetes-vs-docker-swarm-vs-mesos.png)
+
+## Why ECS?
+ECS is simpler to set up and easier to use and you have the full power of AWS behind it, so you can easily integrate it into other AWS services (which we will be doing shortly). In short, you get scheduling, service discovery, load balancing, and auto-scaling out-of-the-box. Plus, you can take full advantage of EC2's multiple availability-zones.
+
+If you're already on AWS and have no desire to leave, then it makes sense to use AWS.
+
+Keep in mind, that ECS is often lagging behind Kubernetes, in terms of features, though. If you're looking for the most features and portability and you don't mind installing and managing the tool, then Kubernetes, Docker Swarm, or Mesos may be right for you.
+
+One last thing to take note of is that since ECS is closed-source, there isn't a true way to run an environment locally in order to achieve development-to-production parity.
+
+> For more, review the [Choosing the Right Containerization and Cluster Management Tool](https://blog.kublr.com/choosing-the-right-containerization-and-cluster-management-tool-fdfcec5700df) blog post.
+
+## Orchestration Feature Wish-List
+Most orchestration tools come with a core set of features. You can find those features below along with the associated AWS service...
+
+|Feature|Info|AWS Service |
+|-------|:--|:-----------|
+|Health checks |Verify when a task is ready to accept traffic |ALB
+|Path-based routing |Forward requests based on the URL path |ALB
+|Dynamic port-mapping |Assign ports dynamically when a new container is spun up |ALB
+|Zero-downtime deployments |Deployments do not disrupt the users |ALB
+|Service discovery |Automatic detection of new containers and services |ALB, ECS
+|High availability |Containers are evenly distributed across Availability Zones	|ECS
+|Auto scaling |Scaling resources up or down automatically based on fluctuations in traffic patterns or metrics (like CPU usage)	  |ECS
+|Provisioning |New containers should select hosts based on resources and configuration |ECS
+|Container storage |Private image storage and management  |ECR
+|Container logs |Centralized storage of container logs |CloudWatch
+|Monitoring |Ability to monitor basic stats like CPU usage, memory, I/O, and network usage as well as set alarms and create events |CloudWatch
+|Secrets management |Sensitive info should be encrypted and stored in a centralized store |Parameter Store, KMS, IAM
+Review the [Getting Started with Amazon ECS guide](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_GetStarted.html).
+
+# IAM
+IAM is used to manage access to AWS services:
+
+- WHO is trying to access (authentication)
+- WHICH service are they trying to access (authorization)
+- WHAT are they trying to do (authorization)
+> Review the [Understanding How IAM Works guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/intro-structure.html).
+
+Although not required, it's a good idea to set up another new IAM User and Role specifically for container instances and set up Multi Factor Authentication (MFA) for this new account along with the root account. For more, review the [Create an IAM User](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/get-set-up-for-amazon-ecs.html#create-an-iam-user) and Using [Multi-Factor Authentication (MFA) in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html) guides, respectively.
+
+# Elastic Container Registry
+## Image Registry
+A container image registry is used to store and distribute container images. [Docker Hub](https://docs.docker.com/docker-hub/) is one of the more popular image registry services for public images—basically GitHub for Docker images.
+
+> Review the following Stack Overflow [article](https://stackoverflow.com/a/34004418/1799408) for more info on Docker Hub and image registries in general.
+
+## ECR
+Why [Elastic Container Registry](https://aws.amazon.com/ecr/)?
+
+1. We do not want to add any sensitive info to the images on Docker Hub since they are publicly available
+2. ECR plays nice with the [Elastic Container Service](https://aws.amazon.com/ecs/) (which we'll be setting up shortly)
+
+Navigate to [Amazon ECS](https://console.aws.amazon.com/ecs), click "Repositories", and then add four new repositories:
+
+1. test-driven-users
+2. test-driven-users_db
+3. test-driven-client
+4. test-driven-swagger
+> Why only four images? We’ll use the [Application Load Balancer](https://aws.amazon.com/elasticloadbalancing/features/#Details_for_Elastic_Load_Balancing_Products) instead of Nginx in our stack so we won’t need that image or container.
+
+You can also create a new repository with the [AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_AWSCLI.html#AWSCLI_create_repository):
+```
+$ aws ecr create-repository --repository-name REPOSITORY_NAME --region us-east-2
+```
+So, if the branch is either staging or production and it's not a pull request, we download the AWS CLI, log in to AWS, and then set the appropriate TAG and REPO.
+
+Grab your AWS credentials from the ~/.aws/credentials file:
+```
+$ cat ~/.aws/credentials
+```
+Set them as environment variables within the Repository Settings of your testdriven-app on Travis:
+
+1. AWS_ACCOUNT_ID - YOUR_ACCOUNT_ID
+2. AWS_ACCESS_KEY_ID - YOUR_ACCCES_KEY_ID
+3. AWS_SECRET_ACCESS_KEY - YOUR_SECRET_ACCESS_KEY
+
+
+In .travis.yml do you notice the COMMIT variable?
+```
+COMMIT=${TRAVIS_COMMIT::8}
+```
+This sets a new environment variable, which contains the first 8 characters of the git commit hash. We not only have a unique name with the image, we can now tie it back to a commit in case we need to troubleshoot the code in the image.
+
+# Elastic Load Balancer
+
+The [Elastic Load Balancer](https://aws.amazon.com/elasticloadbalancing/) distributes incoming application traffic and scales resources as needed to meet traffic needs.
+
+A load balancer is one of (if not) the most important parts of your application since it needs to always be up, routing traffic to healthy services, and ready to scale at a moment’s notice.
+
+Further, a load balancer:
+
+1. Improves throughput, which can help decrease latency
+2. Prevents the overloading of a single service
+4. Provides a framework for updating service on the fly
+5. Improves tolerance for back-end failures
+
+There are currently [three types](https://aws.amazon.com/elasticloadbalancing/details/#details) of Elastic Load Balancers to choose from. We’ll be using the Application Load Balancer since it provides support for [path-based routing](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/tutorial-load-balancer-routing.html) and [dynamic port-mapping](https://aws.amazon.com/premiumsupport/knowledge-center/dynamic-port-mapping-ecs/) and it also enables zero-downtime deployments and support for A/B testing. The Application Load Balancer is one of those AWS services that makes ECS so powerful. In fact, before it’s release, ECS was not a viable container orchestration solution.
+
+## Configuring ALB
+Navigate to [Amazon EC2](https://console.aws.amazon.com/ec2/), click "Load Balancers" on the sidebar, and then click the "Create Load Balancer" button. Select the "Create" button under "Application Load Balancer".
+
+### Step 1: Configure Load Balancer
+1. "Name": testdriven-staging-alb
+2. "Scheme": internet-facing
+3. "IP address type": ipv4
+4. "Listeners": HTTP / Port 80
+5. "VPC": Select the [default VPC](https://docs.aws.amazon.com/AmazonVPC/latest/UserGuide/default-vpc.html) to keep things simple
+6. "Availability Zones": Select at least two available subnets
+
+![configure load balancer](https://testdriven.io/static/images/courses/microservices/05_configure-load-balancer1.png)
+
+### Step 2: Configure Security Settings
+Skip this for now.
+
+### Step 3: Configure Security Groups
+Select an existing Security Group or create a new Security Group (akin to a firewall) called testdriven-security-group, making sure at least HTTP 80 and SSH 22 are open.
+
+![configure security groups](https://testdriven.io/static/images/courses/microservices/05_configure-load-balancer2.png)
+
+### Step 4: Configure Routing
+1. "Name": testdriven-client-stage-tg
+2. "Target type": Instance
+3. "Port": 80
+4. "Path": /
+
+![configure routing](https://testdriven.io/static/images/courses/microservices/05_configure-load-balancer3.png)
+
+### Step 5: Register Targets
+Do not assign any instances manually since this will be managed by ECS. Review and then create the new load balancer.
+
+Once created, take note of the new Security Group:
+![register targets](https://testdriven.io/static/images/courses/microservices/05_configure-load-balancer4.png)
+
+With that, we also need to set up [Target Groups](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html) and [Listeners](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-listeners.html):
+
+![target groups](https://testdriven.io/static/images/courses/microservices/05_elastic-load-balancing.png)
+
+## Target Groups
+[Target Groups]((https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html)) are attached to the Application Load Balancer and are used to route traffic to the containers found in the ECS Service.
+
+You may not have noticed, but a Target Group called testdriven-client-stage-tg was already created (which we'll use for the client app) when we set up the Application Load Balancer, so we just need to set up two more.
+
+Within the EC2 Dashboard, click "Target Groups", and then create the following Target Groups:
+
+### Target Group 1: users
+1. "Target group name": testdriven-users-stage-tg
+2. "Port": 5000
+3. Then, under "Health check settings" set the "Path" to /users/ping.
+
+![user target group](https://testdriven.io/static/images/courses/microservices/05_configure-target-group-users-stage.png)
+
+### Target Group 2: swagger
+1. "Target group name": testdriven-swagger-stage-tg
+2. "Port": 8080
+3. Then, under "Health check settings" set the "Path" to /swagger.
+
+![swagger target group](https://testdriven.io/static/images/courses/microservices/05_configure-target-group-swagger-stage.png)
+
+## Listeners
+Back on the "Load Balancers" page within the EC2 Dashboard, select the testdriven-staging-alb Load Balancer, and then click the "Listeners" tab. Here, we can add Listeners to the load balancer, which are then forwarded to a specific Target Group.
+
+There should already be a listener for "HTTP : 80". Click the "View/edit rules >" link, and then insert four new rules:
+
+1. If path is /swagger*, Then forward to testdriven-swagger-stage-tg
+2. If path is /auth*, Then forward to testdriven-users-stage-tg
+3. If path is /users*, Then forward to testdriven-users-stage-tg
+
+![listeners](https://testdriven.io/static/images/courses/microservices/05_load-balancer-listeners-stage.png)
