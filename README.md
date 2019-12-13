@@ -3,7 +3,23 @@
 [![Build Status](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker.svg?token=5DLmUBR4W3LuNvxXHAap&branch=devel)](https://travis-ci.com/PatrickCmd/Microservice_architecture_flask_docker)
 
 
-## Common Commands
+## Work Flow
+The following commands are for spinning up all the containers.
+### Development
+#### Environment Variables
+```python
+import binascii
+import os
+binascii.hexlify(os.urandom(24))
+b'f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1'
+```
+```
+$ export SECRET_KEY=f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1
+```
+Export REACT APP URL
+```
+export REACT_APP_USERS_SERVICE_URL=http://localhost
+```
 Build the images:
 ```
 $ docker-compose build
@@ -11,10 +27,6 @@ $ docker-compose build
 Run the containers:
 ```
 $ docker-compose up -d
-```
-Build images and run the containers with Nginx
-```
-docker-compose up -d --build nginx
 ```
 Initialize database and run migrations
 ```
@@ -69,30 +81,119 @@ Run the client react tests with coverage
 ```
 $ docker-compose exec client react-scripts test --coverage --watchAll=false --verbose
 ```
-Run End to end tests
+Run the e2e tests
 ```
-$ ./node_modules/.bin/cypress open
-```
-Run End to end tests on production build
-```
-$ docker-compose -f docker-compose-prod.yml up -d --build
-
-$ docker-compose -f docker-compose-prod.yml exec users python manage.py recreate_db
-
-$ docker-compose -f docker-compose-prod.yml exec users python manage.py seed_db
 $ ./node_modules/.bin/cypress open --config baseUrl=http://localhost
 ```
 
-## Automated testing
-#### Run server-side tests
+### Staging setup with Docker machine (AWS)
+Create remote host with docker machine
+```
+$ docker-machine create --driver amazonec2 --amazonec2-open-port 8000 --amazonec2-region us-east-2 microservice-architecture-flask-staging
+```
+Get remote host IP
+```
+docker-machine ip microservice-architecture-flask-staging
+```
+Point docker-machine to the staging server
+```
+$ docker-machine env microservice-architecture-flask-staging
+$ eval $(docker-machine env microservice-architecture-flask-staging)
+```
+#### Environment Variables
+```python
+import binascii
+import os
+binascii.hexlify(os.urandom(24))
+b'f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1'
+```
+```
+$ export SECRET_KEY=f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1
+```
+Export REACT APP URL
+```
+export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_STAGING_IP
+```
+Build the images and run the containers
+```
+$ docker-compose -f docker-compose-stage.yml up -d --build
+```
+Create database tables
+```
+$ docker-compose -f docker-compose-stage.yml exec users python manage.py recreate_db
+```
+Seed the database
+```
+$ docker-compose -f docker-compose-stage.yml exec users python manage.py seed_db
+```
+Run tests
+```
+docker-compose -f docker-compose-stage.yml exec users python manage.py test
+```
+Run the e2e tests
+```
+$ ./node_modules/.bin/cypress open --config baseUrl=http://DOCKER_MACHINE_STAGING_IP
+```
+
+### Production setup with Docker machine (AWS)
+Create remote host with docker machine
+```
+$ docker-machine create --driver amazonec2 --amazonec2-open-port 8000 --amazonec2-region us-east-2 microservice-architecture-flask
+```
+Get remote host IP
+```
+docker-machine ip microservice-architecture-flask
+```
+Point docker-machine to the production server
+```
+$ docker-machine env microservice-architecture-flask
+$ eval $(docker-machine env microservice-architecture-flask)
+```
+#### Environment Variables
+```python
+import binascii
+import os
+binascii.hexlify(os.urandom(24))
+b'f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1'
+```
+```
+$ export SECRET_KEY=f9ce7926e1b11a1f5e64c152a5a900f5335739224d073ce1
+```
+Export REACT APP URL
+```
+export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_IP
+```
+Build remote host image
+```
+$ docker-compose -f docker-compose-prod.yml up -d --build
+```
+Create database tables
+```
+$ docker-compose -f docker-compose-prod.yml exec users python manage.py recreate_db
+```
+Seed the database
+```
+$ docker-compose -f docker-compose-prod.yml exec users python manage.py seed_db
+```
+Run tests
+```
+docker-compose -f docker-compose-prod.yml exec users python manage.py test
+```
+Run the e2e tests
+```
+$ ./node_modules/.bin/cypress open --config baseUrl=http://DOCKER_MACHINE_IP
+```
+
+## Test Script
+#### Run server-side unit and integration tests (against dev):
 ```
 $ sh test.sh server
 ```
-#### Run client-side tests
+#### Run client-side unit and integration tests (against dev):
 ```
 $ sh test.sh client
 ```
-#### Run e2e tests
+#### Run Cypress-based end-to-end tests (against prod)
 ```
 $ sh test e2e
 ```
@@ -102,12 +203,150 @@ Run the bash script to run all tests.
 $ sh test.sh all
 ```
 
+
+## Individual Services
+The following commands are for spinning up individual containers.
+
+### Users DB
+Build and run:
+```
+$ docker-compose up -d --build users-db
+```
+Test:
+```
+$ docker-compose exec users-db psql -U postgres
+```
+### Users
+Build and run:
+```
+$ docker-compose up -d --build users
+```
+To test, navigate to http://localhost:5001/users/ping in your browser.
+
+Create and seed the database:
+```
+$ docker-compose exec users python manage.py recreate_db
+$ docker-compose exec users python manage.py seed_db
+```
+To test, navigate to http://localhost:5001/users in your browser.
+
+Run the unit and integration tests:
+```
+$ docker-compose exec users python manage.py test
+```
+Lint:
+```
+$ docker-compose exec users flake8 --max-line-length=100 project
+$ docker-compose exec users black project
+```
+### Client
+Set env variable:
+```
+$ export REACT_APP_USERS_SERVICE_URL=http://localhost
+```
+Build and run:
+```
+$ docker-compose up -d --build client
+```
+To test, navigate to http://localhost:3007 in your browser.
+
+Keep in mind that you won't be able to register or log in until Nginx is set up.
+
+Run the client-side tests:
+```
+$ docker-compose exec client npm test -- --verbose
+```
+### Swagger
+Update swagger.json:
+```
+$ python services/swagger/update-spec.py http://localhost
+```
+Build and run:
+```
+$ docker-compose up -d --build swagger
+```
+To test, navigate to http://localhost:3008 in your browser.
+
+### Nginx
+Build and run:
+```
+$ docker-compose up -d --build nginx
+```
+With the other services up, you can test by navigating to http://localhost in your browser.
+
+Also, run the e2e tests:
+```
+$ ./node_modules/.bin/cypress open --config baseUrl=http://localhost
+```
+#### Aliases
+To save some precious keystrokes, let's create aliases for both the docker-compose and docker-machine commands —dc and dm, respectively.
+
+Simply add the following lines to your .bashrc file:
+```
+alias dc='docker-compose'
+alias dm='docker-machine'
+```
+Save the file, then execute it:
+```
+$ source ~/.bashrc
+```
+Test them out!
+
+On Windows? You will first need to create a PowerShell Profile (if you don't already have one), and then you can add the aliases to it using Set-Alias—i.e., Set-Alias dc docker-compose.
+
+### "Saved" State
+Using Docker Machine for local development? Is the VM stuck in a "Saved" state?
+```
+$ docker-machine ls
+
+NAME                                     ACTIVE   DRIVER       STATE     URL                        SWARM    DOCKER     ERRORS
+microservice-architecture-flask-prod   *        amazonec2    Running   tcp://34.207.173.181:2376          v18.09.2
+microservice-architecture-flask-dev       -        virtualbox   Saved                                        Unknown
+```
+First, try:
+```
+$ docker-machine start testdriven-dev
+```
+If that doesn't work, to break out of this, you'll need to power off the VM. For example, if you're using VirtualBox as your Hypervisor, you can:
+
+1. Start virtualbox: virtualbox
+2. Select the VM and click "start"
+3. Exit the VM and select "Power off the machine"
+4. Exit virtualbox
+The VM should now have a "Stopped" state:
+```
+$ docker-machine ls
+
+NAME                                  ACTIVE   DRIVER       STATE     URL                        SWARM   DOCKER     ERRORS
+microservice-architecture-flask-prod   *        amazonec2    Running   tcp://34.207.173.181:2376          v18.09.2
+microservice-architecture-flask-dev    -        virtualbox   Stopped
+```
+Now you can start the machine:
+```
+$ docker-machine start testdriven-dev
+```
+It should be "Running":
+```
+$ docker-machine ls
+
+NAME                                  ACTIVE    DRIVER       STATE     URL                        SWARM   DOCKER     ERRORS
+microservice-architecture-flask-prod   *        amazonec2    Running   tcp://34.207.173.181:2376          v18.09.2
+microservice-architecture-flask-dev    -        virtualbox   Running   tcp://192.168.99.100:2376          v18.09.2
+```
+Restart the Machine and then start over:
+```
+$ docker-machine restart microservice-architecture-flask-dev
+$ docker-machine env microservice-architecture-flask-dev
+$ eval $(docker-machine env microservice-architecture-flask-dev)
+$ docker-compose up -d --build
+```
+
 ## Other commands
-To stop the containers:
+Stop the containers:
 ```
 $ docker-compose stop
 ```
-To bring down the containers:
+Run down the containers:
 ```
 $ docker-compose down
 ```
@@ -118,6 +357,10 @@ $ docker-compose build --no-cache
 Remove images:
 ```
 $ docker rmi $(docker images -q)
+```
+Reset Docker environment to localhost, unsetting all Docker environment variables:
+```
+$ eval $(docker-machine env -u)
 ```
 
 ## Postgres
@@ -137,81 +380,6 @@ docker-compose exec users python manage.py shell
 Show application URL routes
 ```
 docker-compose exec users python manage.py routes
-```
-
-## Staging setup with Docker machine (AWS)
-Create remote host with docker machine
-```
-$ docker-machine create --driver amazonec2 --amazonec2-open-port 8000 --amazonec2-region us-east-2 microservice-architecture-flask-staging
-```
-Build remote host image
-```
-$ docker-compose -f docker-compose-stage.yml up -d --build
-```
-Create database tables
-```
-$ docker-compose -f docker-compose-stage.yml exec users python manage.py recreate_db
-```
-Seed the database
-```
-$ docker-compose -f docker-compose-stage.yml exec users python manage.py seed_db
-```
-Point docker-machine to active remote hoste
-```
-$ docker-machine env microservice-architecture-flask-staging
-$ eval $(docker-machine env microservice-architecture-flask-staging)
-```
-Run tests
-```
-docker-compose -f docker-compose-stage.yml exec users python manage.py test
-```
-Get remote host IP
-```
-docker-machine ip microservice-architecture-flask-staging
-```
-Export REACT APP URL
-```
-export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_STAGING_IP
-```
-
-## Production setup with Docker machine (AWS)
-Create remote host with docker machine
-```
-$ docker-machine create --driver amazonec2 --amazonec2-open-port 8000 --amazonec2-region us-east-2 microservice-architecture-flask
-```
-Build remote host image
-```
-$ docker-compose -f docker-compose-prod.yml up -d --build
-```
-Create database tables
-```
-$ docker-compose -f docker-compose-prod.yml exec users python manage.py recreate_db
-```
-Seed the database
-```
-$ docker-compose -f docker-compose-prod.yml exec users python manage.py seed_db
-```
-Point docker-machine to active remote hoste
-```
-$ docker-machine env microservice-architecture-flask
-$ eval $(docker-machine env microservice-architecture-flask)
-```
-Run tests
-```
-docker-compose -f docker-compose-prod.yml exec users python manage.py test
-```
-Get remote host IP
-```
-docker-machine ip microservice-architecture-flask
-```
-Export REACT APP URL
-```
-export REACT_APP_USERS_SERVICE_URL=http://DOCKER_MACHINE_IP
-```
-
-## Point docker-machine back to localhost
-```
-eval $(docker-machine env -u)
 ```
 
 ## Flask and Extensions
