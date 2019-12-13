@@ -450,3 +450,92 @@ docker-compose exec users python manage.py routes
 - [SWagger](https://swagger.io/docs/specification/about/)
 - [Swagger Specification](https://swagger.io/specification/)
 - [JSON to YAML / YAML to JSON](https://www.json2yaml.com/)
+
+# AWS(ECS)
+## What is Container Orchestration?
+As you move from deploying containers on a single machine to deploying them across a number of machines, you will need an orchestration tool to manage the arrangement and coordination of the containers across the entire system. This is where ECS fits in along with a number of other orchestration tools, like [Kubernetes](https://kubernetes.io/), [Mesos](https://mesos.apache.org/), and [Docker Swarm](https://docs.docker.com/engine/swarm/).
+
+![kubernetes vs docker swarm vs mesos](https://testdriven.io/static/images/courses/microservices/05_kubernetes-vs-docker-swarm-vs-mesos.png)
+
+## Why ECS?
+ECS is simpler to set up and easier to use and you have the full power of AWS behind it, so you can easily integrate it into other AWS services (which we will be doing shortly). In short, you get scheduling, service discovery, load balancing, and auto-scaling out-of-the-box. Plus, you can take full advantage of EC2's multiple availability-zones.
+
+If you're already on AWS and have no desire to leave, then it makes sense to use AWS.
+
+Keep in mind, that ECS is often lagging behind Kubernetes, in terms of features, though. If you're looking for the most features and portability and you don't mind installing and managing the tool, then Kubernetes, Docker Swarm, or Mesos may be right for you.
+
+One last thing to take note of is that since ECS is closed-source, there isn't a true way to run an environment locally in order to achieve development-to-production parity.
+
+> For more, review the [Choosing the Right Containerization and Cluster Management Tool](https://blog.kublr.com/choosing-the-right-containerization-and-cluster-management-tool-fdfcec5700df) blog post.
+
+## Orchestration Feature Wish-List
+Most orchestration tools come with a core set of features. You can find those features below along with the associated AWS service...
+
+|Feature|Info|AWS Service |
+|-------|:--|:-----------|
+|Health checks |Verify when a task is ready to accept traffic |ALB
+|Path-based routing |Forward requests based on the URL path |ALB
+|Dynamic port-mapping |Assign ports dynamically when a new container is spun up |ALB
+|Zero-downtime deployments |Deployments do not disrupt the users |ALB
+|Service discovery |Automatic detection of new containers and services |ALB, ECS
+|High availability |Containers are evenly distributed across Availability Zones	|ECS
+|Auto scaling |Scaling resources up or down automatically based on fluctuations in traffic patterns or metrics (like CPU usage)	  |ECS
+|Provisioning |New containers should select hosts based on resources and configuration |ECS
+|Container storage |Private image storage and management  |ECR
+|Container logs |Centralized storage of container logs |CloudWatch
+|Monitoring |Ability to monitor basic stats like CPU usage, memory, I/O, and network usage as well as set alarms and create events |CloudWatch
+|Secrets management |Sensitive info should be encrypted and stored in a centralized store |Parameter Store, KMS, IAM
+Review the [Getting Started with Amazon ECS guide](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_GetStarted.html).
+
+# IAM
+IAM is used to manage access to AWS services:
+
+- WHO is trying to access (authentication)
+- WHICH service are they trying to access (authorization)
+- WHAT are they trying to do (authorization)
+> Review the [Understanding How IAM Works guide](https://docs.aws.amazon.com/IAM/latest/UserGuide/intro-structure.html).
+
+Although not required, it's a good idea to set up another new IAM User and Role specifically for container instances and set up Multi Factor Authentication (MFA) for this new account along with the root account. For more, review the [Create an IAM User](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/get-set-up-for-amazon-ecs.html#create-an-iam-user) and Using [Multi-Factor Authentication (MFA) in AWS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_mfa.html) guides, respectively.
+
+# Elastic Container Registry
+## Image Registry
+A container image registry is used to store and distribute container images. [Docker Hub](https://docs.docker.com/docker-hub/) is one of the more popular image registry services for public images—basically GitHub for Docker images.
+
+> Review the following Stack Overflow [article](https://stackoverflow.com/a/34004418/1799408) for more info on Docker Hub and image registries in general.
+
+## ECR
+Why [Elastic Container Registry](https://aws.amazon.com/ecr/)?
+
+1. We do not want to add any sensitive info to the images on Docker Hub since they are publicly available
+2. ECR plays nice with the [Elastic Container Service](https://aws.amazon.com/ecs/) (which we'll be setting up shortly)
+
+Navigate to [Amazon ECS](https://console.aws.amazon.com/ecs), click "Repositories", and then add four new repositories:
+
+1. test-driven-users
+2. test-driven-users_db
+3. test-driven-client
+4. test-driven-swagger
+> Why only four images? We’ll use the [Application Load Balancer](https://aws.amazon.com/elasticloadbalancing/features/#Details_for_Elastic_Load_Balancing_Products) instead of Nginx in our stack so we won’t need that image or container.
+
+You can also create a new repository with the [AWS CLI](https://docs.aws.amazon.com/AmazonECR/latest/userguide/ECR_AWSCLI.html#AWSCLI_create_repository):
+```
+$ aws ecr create-repository --repository-name REPOSITORY_NAME --region us-east-2
+```
+So, if the branch is either staging or production and it's not a pull request, we download the AWS CLI, log in to AWS, and then set the appropriate TAG and REPO.
+
+Grab your AWS credentials from the ~/.aws/credentials file:
+```
+$ cat ~/.aws/credentials
+```
+Set them as environment variables within the Repository Settings of your testdriven-app on Travis:
+
+1. AWS_ACCOUNT_ID - YOUR_ACCOUNT_ID
+2. AWS_ACCESS_KEY_ID - YOUR_ACCCES_KEY_ID
+3. AWS_SECRET_ACCESS_KEY - YOUR_SECRET_ACCESS_KEY
+
+
+In .travis.yml do you notice the COMMIT variable?
+```
+COMMIT=${TRAVIS_COMMIT::8}
+```
+This sets a new environment variable, which contains the first 8 characters of the git commit hash. We not only have a unique name with the image, we can now tie it back to a commit in case we need to troubleshoot the code in the image.
